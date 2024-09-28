@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JToH XXS Tower Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #userId-input {
+            padding: 10px;
+            font-size: 16px;
+            width: 200px;
+        }
+
+        #fetch-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        #tower-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .tower-category {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .tower-category h2 {
+            font-size: 18px;
+            margin: 0;
+            color: #007bff;
+        }
+
+        .tower-list-item {
+            padding: 5px;
+            border: 1px solid #ddd;
+            margin-top: 5px;
+            border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            background-color: #f1f1f1;
+        }
+
+        .tower-list-item.completed {
+            background-color: #c8e6c9; /* Green for completed towers */
+        }
+    </style>
+</head>
+<body>
+    <h1>JToH XXS Tower Tracker</h1>
+    <input type="text" id="userId-input" placeholder="Enter Roblox User ID">
+    <button id="fetch-button">Check Stats</button>
+
+    <div id="tower-list"></div>
+
+    <script>
+        // Define your game ID and towers data
+        const gameId = 129574800041492; // Replace with the actual game ID
+        const towers = [
+            {
+                category: "Ring 1",
+                towers: [
+                    { name: "Room of Annoyingly Simple Trials", difficulty: "Easy", badgeId: 600775225109428 },
+                    { name: "Room of Anger", difficulty: "Easy", badgeId: 289899390648178 },
+                    { name: "Not Even A Room", difficulty: "Easy", badgeId: 605918480010527 },
+                    { name: "Room of Madness", difficulty: "Medium", badgeId: 371187137091331 },
+                    { name: "Room of Hecc", difficulty: "Hard", badgeId: 4351940253702928 },
+                    { name: "Room of Killjoys", difficulty: "Hard", badgeId: 3693309010170101 },
+                    { name: "Room of Keyboard Yeeting", difficulty: "Difficult", badgeId: 1984369590835718 },
+                    { name: "Room of Stress", difficulty: "Difficult", badgeId: 1288545467002827 },
+                    { name: "Room of Screen Punching", difficulty: "Challenging", badgeId: 499724704859288 },
+                    { name: "Room of Rage", difficulty: "Challenging", badgeId: 3578824442255537 },
+                    { name: "Room of Impossible Expectations", difficulty: "Challenging", badgeId: 778775410265219 },
+                    { name: "Room of Moderate Enragement", difficulty: "Intense", badgeId: 1482385170435840 },
+                    { name: "Edifice of Laptop Splitting", difficulty: "Intense", badgeId: 601070918542492 },
+                    { name: "Room of True Skill", difficulty: "Remorseless", badgeId: 4010544577456507 },
+                    { name: "Thanos Room", difficulty: "Insane", badgeId: 1532025350947666 },
+                    // Add more towers here
+                ]
+            }
+            // Add more rings/categories as needed
+        ];
+
+        // Function to fetch user badges by user ID
+        async function fetchUserBadges(userId) {
+            try {
+                const response = await fetch(`https://badges.roblox.com/v1/users/${userId}/badges`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('User badges response:', data);
+
+                if (data.data && data.data.length > 0) {
+                    return data.data.map(badge => badge.badgeId); // Return an array of badge IDs
+                } else {
+                    alert("No badges found for this User ID.");
+                    return [];
+                }
+            } catch (error) {
+                console.error("Error fetching user badges:", error);
+                alert("An error occurred while fetching badges. Please check your internet connection and try again.");
+                return [];
+            }
+        }
+
+        // Function to render the towers
+        function renderTowers(userBadgeIds) {
+            const towerList = document.getElementById("tower-list");
+            towerList.innerHTML = "";
+
+            towers.forEach((ring) => {
+                const ringDiv = document.createElement("div");
+                ringDiv.className = "tower-category";
+
+                const ringTitle = document.createElement("h2");
+                ringTitle.textContent = ring.category;
+                ringDiv.appendChild(ringTitle);
+
+                ring.towers.forEach((tower) => {
+                    const towerItem = document.createElement("div");
+                    towerItem.className = "tower-list-item";
+                    towerItem.innerHTML = `<span>${tower.name} (${tower.difficulty})</span>`;
+
+                    // Check if the tower's badgeId is in the user's badge IDs
+                    if (userBadgeIds.includes(tower.badgeId)) {
+                        towerItem.classList.add("completed");
+                    }
+
+                    ringDiv.appendChild(towerItem);
+                });
+
+                towerList.appendChild(ringDiv);
+            });
+        }
+
+        // Function to fetch and display data based on the user ID
+        async function displayUserTowers() {
+            const userId = document.getElementById("userId-input").value.trim();
+            if (!userId) return alert("Please enter a valid User ID.");
+
+            const userBadges = await fetchUserBadges(userId);
+            renderTowers(userBadges);
+        }
+
+        // Add event listener to the button
+        document.getElementById("fetch-button").addEventListener("click", displayUserTowers);
+    </script>
+</body>
+</html>
