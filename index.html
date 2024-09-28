@@ -106,19 +106,18 @@
             // Add more rings/categories as needed
         ];
 
-        // Function to fetch user badges using the CORS proxy
+        // Function to fetch user badges
         async function fetchUserBadges(userId) {
             try {
-                // Use the CORS proxy in front of your request
-                const response = await fetch(`https://cors-anywhere.herokuapp.com/https://badges.roblox.com/v1/users/${userId}/badges`);
-                
+                const response = await fetch(`https://badges.roblox.com/v1/users/${userId}/badges`);
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
-                const data = await response.json();
-                console.log('User badges response:', data);
-                return data.data.map(badge => badge.badgeId); // Extract badge IDs
+                const badgeData = await response.json();
+                console.log('User badges response:', badgeData);
+                return badgeData.data.map(badge => badge.badgeId); // Extract badge IDs
             } catch (error) {
                 console.error("Error fetching user badges:", error);
                 alert("An error occurred while fetching badges. Please check your internet connection and try again.");
